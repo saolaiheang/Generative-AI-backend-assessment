@@ -5,9 +5,15 @@ import { RoleEnum, RoleType } from '../common';
 
 
 // Middleware to protect routes and check roles
+const apiKey = process.env.API_Key;
+
 const protectRoute = (roles: RoleType[] = [RoleEnum[2]]) => {
   return (req: Request, res: Response, next: NextFunction) => {
-    const authHeader = req.headers.authorization;
+    const authHeader = req.headers.authorization; const apiKeyRequest = req.headers["x-api-key"] as string;
+    console.log(apiKeyRequest, "...................");
+    if (apiKeyRequest != apiKey) {
+      return res.status(401).json({ message: "API key required" })
+    }
 
     // Check if Authorization header exists and starts with "Bearer"
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -17,14 +23,14 @@ const protectRoute = (roles: RoleType[] = [RoleEnum[2]]) => {
     }
 
     const token = authHeader.split(" ")[1]; // Extract the token after "Bearer"
-    
+
     // Check if Authorization header exists and starts with "Bearer"
-    if (!token ) {
+    if (!token) {
       return res.status(401).json({
         message: "Access denied, no token provided or invalid format",
       });
     }
-    
+
     try {
       // Verify token
       const decoded = jwt.verify(token, process.env.JWT_SECRET || "") as TokenPayload;

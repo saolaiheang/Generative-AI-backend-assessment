@@ -11,7 +11,8 @@ import swaggerUi from 'swagger-ui-express';
 import swaggerOptions from './swagger';
 import chat from './src/routes/chat'
 import cors from "cors";
-
+import certificate from "./src/routes/certificate"
+import {rateLimit} from 'express-rate-limit'
 
 // Middleware setup
 app.use(express.json());
@@ -20,6 +21,12 @@ var corsOptions = {
   origin: "*",
 };
 
+
+const limiter = rateLimit({
+  windowMs: 2 * 60 * 1000, 
+  limit:200
+})
+app.use(limiter)
 app.use(cors(corsOptions));
 
 // Swagger setup
@@ -29,6 +36,7 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 // Routes setup
 app.use('/api/auth', auth)
 app.use('/api/chat', chat)
+app.use('/api/certificate',certificate)
 
 
 // Start server
